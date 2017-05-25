@@ -41,7 +41,7 @@ func (rtm *RTM) ManageConnection() {
 			Info:            info,
 		}}
 
-		rtm.conn = conn
+		rtm.Conn = conn
 		rtm.isConnected = true
 
 		keepRunning := make(chan bool)
@@ -131,7 +131,7 @@ func (rtm *RTM) killConnection(keepRunning chan bool, intentional bool) error {
 	}
 	rtm.isConnected = false
 	rtm.wasIntentional = intentional
-	err := rtm.conn.Close()
+	err := rtm.Conn.Close()
 	rtm.IncomingEvents <- RTMEvent{"disconnected", &DisconnectedEvent{intentional}}
 	return err
 }
@@ -204,7 +204,7 @@ func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
 		}}
 		return
 	}
-	err := websocket.JSON.Send(rtm.conn, msg)
+	err := websocket.JSON.Send(rtm.Conn, msg)
 	if err != nil {
 		rtm.IncomingEvents <- RTMEvent{"outgoing_error", &OutgoingErrorEvent{
 			Message:  msg,
@@ -227,7 +227,7 @@ func (rtm *RTM) ping() error {
 	rtm.pings[id] = time.Now()
 
 	msg := &Ping{ID: id, Type: "ping"}
-	err := websocket.JSON.Send(rtm.conn, msg)
+	err := websocket.JSON.Send(rtm.Conn, msg)
 	if err != nil {
 		rtm.Debugf("RTM Error sending 'PING %d': %s", id, err.Error())
 		return err
@@ -239,7 +239,7 @@ func (rtm *RTM) ping() error {
 // This will block until a frame is available from the websocket.
 func (rtm *RTM) receiveIncomingEvent() {
 	event := json.RawMessage{}
-	err := websocket.JSON.Receive(rtm.conn, &event)
+	err := websocket.JSON.Receive(rtm.Conn, &event)
 	if err == io.EOF {
 		// EOF's don't seem to signify a failed connection so instead we ignore
 		// them here and detect a failed connection upon attempting to send a
@@ -347,9 +347,10 @@ func (rtm *RTM) handleEvent(typeStr string, event json.RawMessage) {
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
 var eventMapping = map[string]interface{}{
-	"message":         MessageEvent{},
-	"presence_change": PresenceChangeEvent{},
-	"user_typing":     UserTypingEvent{},
+	"message":              MessageEvent{},
+	"desktop_notification": DesktopNotification{},
+	"presence_change":      PresenceChangeEvent{},
+	"user_typing":          UserTypingEvent{},
 
 	"channel_marked":          ChannelMarkedEvent{},
 	"channel_created":         ChannelCreatedEvent{},

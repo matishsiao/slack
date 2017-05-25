@@ -24,7 +24,7 @@ type RTM struct {
 	pings map[int]time.Time
 
 	// Connection life-cycle
-	conn             *websocket.Conn
+	Conn             *websocket.Conn
 	IncomingEvents   chan RTMEvent
 	outgoingMessages chan OutgoingMessage
 	killChannel      chan bool
@@ -35,7 +35,7 @@ type RTM struct {
 
 	// Client is the main API, embedded
 	Client
-	websocketURL string
+	WebsocketURL string
 
 	// UserDetails upon connection
 	info *Info
@@ -69,7 +69,13 @@ func (rtm *RTM) Disconnect() error {
 
 // Reconnect only makes sense if you've successfully disconnectd with Disconnect().
 func (rtm *RTM) Reconnect() error {
-	log.Println("RTM::Reconnect not implemented!")
+	//log.Println("RTM::Reconnect not implemented!")
+	conn, err := websocketProxyDial(rtm.WebsocketURL, SLACK_API)
+	if err != nil {
+		log.Println("RTM Websocket reconnect failed,",err)
+		return err
+	}
+	rtm.Conn = conn
 	return nil
 }
 

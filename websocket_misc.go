@@ -13,6 +13,21 @@ type AckMessage struct {
 	RTMResponse
 }
 
+type DesktopNotification struct {
+	AvatarImage string      `json:"avatarImage"`
+	Channel     string      `json:"channel"`
+	Content     string      `json:"content"`
+	EventTs     string      `json:"event_ts"`
+	ImageURI    interface{} `json:"imageUri"`
+	IsShared    bool        `json:"is_shared"`
+	LaunchURI   string      `json:"launchUri"`
+	Msg         string      `json:"msg"`
+	SsbFilename string      `json:"ssbFilename"`
+	Subtitle    string      `json:"subtitle"`
+	Title       string      `json:"title"`
+	Type        string      `json:"type"`
+}
+
 // RTMResponse encapsulates response details as returned by the Slack API
 type RTMResponse struct {
 	Ok    bool      `json:"ok"`
